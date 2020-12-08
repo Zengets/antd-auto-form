@@ -7,4 +7,5 @@ node_modules
 .gitignore
 webpack.config.js
 yarn.lock
+package-lock.json
 .eslintrc

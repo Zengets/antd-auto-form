@@ -1,8 +1,9 @@
 {
-  "name": "antd-auto-form",
+  "name": "antd-auto-forms",
   "version": "1.0.0",
   "description": "antd form component for high speed develop ",
   "main": "index.js",
+  "registory":"b87e27b3-193b-4060-80dd-27ad3531d5ae",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --config webpack.config.js -p",
