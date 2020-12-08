@@ -1,7 +1,6 @@
 #ignore files
 
-node_modules
-
+/node_modules
 .history
-dist
+/dist
 *.log

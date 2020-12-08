@@ -1,12 +1,22 @@
-var path = require('path')
-var webpack = require('webpack')
+const path = require('path');
+const NODE_ENV = process.env.NODE_ENV; // 获取环境变量
+const isProd = NODE_ENV === 'production';
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin'); // 每次构建清除上一次打包出来的文件
+const nodeExternals = require('webpack-node-externals');
+const plugins = isProd ? [new CleanWebpackPlugin()] : [
+  new CleanWebpackPlugin(),
+  new HtmlWebpackPlugin({
+    template: 'public/index.html'
+  }),
+]
+
 module.exports = {
-  entry: './src/index.js', //入口文件路径
+  mode: isProd ? 'production' : 'development',
+  entry: isProd ? './src/components/index.js' : './src/app.js',
   output: {
-    filename: 'main.js',
-    library: 'nsc-components',
-    libraryTarget: 'umd',
-    libraryExport: 'default'
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, './dist'),
   },
   module: {
     rules: [
@@ -27,24 +37,14 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [{
-          loader: "style-loader"
-        },
-        {
-          loader: 'css-loader',
-          options: {
-            modules: {
-              mode: 'local',
-              localIdentName: '[name]-[local]',
-            },
-          }
-        }
-        ]
+        use: ['style-loader', 'css-loader']
       },
 
     ]
   },
-  plugins: [
-    new webpack.HotModuleReplacementPlugin(),
-  ],
-}
+  devServer: {
+    contentBase: './dist'
+  },
+  externals: isProd ? [nodeExternals()] : [], // nodeExternals 使得打包的组件中不包括任何 node_modules 里面的第三方组件，起到减小体积的作用。
+  plugins,
+};
