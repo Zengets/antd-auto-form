@@ -1,0 +1,72 @@
+{
+  "name": "antd-auto-form",
+  "version": "1.0.0",
+  "description": "antd form component for high speed develop ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config webpack.config.js -p",
+    "prepublish": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wuhao930406/antd-auto-form.git"
+  },
+  "keywords": [
+    "antd",
+    "form"
+  ],
+  "author": "wuhao",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wuhao930406/antd-auto-form/issues"
+  },
+  "homepage": "https://github.com/wuhao930406/antd-auto-form#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-class-properties": "^7.2.3",
+    "@babel/plugin-proposal-object-rest-spread": "^7.2.0",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/preset-react": "^7.0.0",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.0.6",
+    "babel-plugin-import": "^1.12.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-1": "^6.24.1",
+    "classnames": "^2.2.6",
+    "css-loader": "^3.6.0",
+    "eslint": "^6.8.0",
+    "eslint-loader": "^4.0.2",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.14.3",
+    "eslint-watch": "^6.0.0",
+    "less": "^3.10.2",
+    "less-loader": "^5.0.0",
+    "polished": "^3.4.1",
+    "prop-types": "^15.7.2",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "style-loader": "^1.0.0",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.7",
+    "webpack-dev-server": "^3.8.0"
+  },
+  "dependencies": {
+    "@ant-design/pro-table": "^2.13.3",
+    "antd": "^4.9.2",
+    "braft-editor": "^2.3.9",
+    "lodash": "^4.17.15",
+    "react-custom-scrollbars": "^4.2.1",
+    "umi-request": "^1.3.5"
+  },
+  "peerDependencies": {
+    "prop-types": "^15.7.2",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0"
+  }
+}
