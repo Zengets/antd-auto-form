@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { InitForm } from '../dist/bundle.js'
+import { InitForm } from './components/index.js'
 
 
 // type 类型有 table treeselect upload inputnumber datepicker radio select textarea autoinput editor password input 
