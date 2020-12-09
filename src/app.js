@@ -50,13 +50,6 @@ function App() {
     return (
         <div style={{ padding: 24 }}>
             <div style={{ height: 320 }}>
-                <Editor
-                    //serverURL="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-                    value={state}
-                    onChange={(val) => {
-                        setstate(val)
-                    }} />
-                <br />
                 <InitForm
                     fields={fields}
                     submitData={(values, fn) => {
@@ -67,9 +60,7 @@ function App() {
                     }}
                     submitting={false} //接口submit状态
                 >
-
                 </InitForm>
-
             </div>
 
         </div>
