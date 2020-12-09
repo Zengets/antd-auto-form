@@ -1,6 +1,6 @@
 # antd-auto-form
-![Image text](http://47.100.234.193:8888/download/pic.png)
-![Image text](http://47.100.234.193:8888/download/pic1.png)
+![Image text](https://raw.githubusercontent.com/wuhao930406/assets/master/pic.png)
+![Image text](https://raw.githubusercontent.com/wuhao930406/assets/master/pic1.png)
 
 ## 📦 安装
 
