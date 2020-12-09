@@ -16,7 +16,7 @@ $ npm install antd-auto-form
 ```diff
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { InitForm } from '../dist/bundle.js'
+import { InitForm } from 'antd-auto-form'
 
 
 // type 类型有 table treeselect upload inputnumber datepicker radio select textarea autoinput editor password input 
