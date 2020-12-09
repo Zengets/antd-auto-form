@@ -1,9 +1,11 @@
 # antd-auto-form
-![Image text](https://raw.githubusercontent.com/wuhao930406/assets/master/pic.png)
-![Image text](https://raw.githubusercontent.com/wuhao930406/assets/master/pic1.png)
+## ⌨️ 预览
+<div>
+<img src="http://47.100.234.193:8888/download/pic.png" title="demo"/> 
+<img src="http://47.100.234.193:8888/download/pic1.png" title="demo"/> 
+</div>
 
 ## 📦 安装
-
 ```bash
 $ npm install antd-auto-form 
 ```
