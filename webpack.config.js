@@ -17,6 +17,8 @@ module.exports = {
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, './dist'),
+    library:"antd-auto-form",
+    libraryTarget:"umd"
   },
   module: {
     rules: [
@@ -43,7 +45,14 @@ module.exports = {
     ]
   },
   devServer: {
-    contentBase: './dist'
+    contentBase: './dist',
+    proxy:{
+      '/ngy/': {
+        target: 'http://172.21.3.90:8040/',
+        changeOrigin: true,
+        pathRewrite: { '^/ngy': '' },
+      }
+    }
   },
   externals: isProd ? [nodeExternals()] : [], // nodeExternals 使得打包的组件中不包括任何 node_modules 里面的第三方组件，起到减小体积的作用。
   plugins,

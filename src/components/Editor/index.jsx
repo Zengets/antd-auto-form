@@ -3,7 +3,7 @@ import BraftEditor from 'braft-editor';
 import React, { useState, useMemo, useEffect } from 'react';
 import moment from 'moment';
 
-export default function Editor({ value, onChange, height, rerender }) {
+export default function Editor({ value, onChange, height, rerender,serverURL }) {
   let [editorState, ceditor] = useState(
       BraftEditor.createEditorState(
         '<p style="text-align:start;" size="0" _root="undefined" __ownerID="undefined" __hash="undefined" __altered="false"></p>',
@@ -17,7 +17,6 @@ export default function Editor({ value, onChange, height, rerender }) {
   };
 
   let UploadFn = (param) => {
-    const serverURL = '/ngy/ngic-auth/common/uploadFile';
     const xhr = new XMLHttpRequest();
     const fd = new FormData();
     const successFn = (response) => {

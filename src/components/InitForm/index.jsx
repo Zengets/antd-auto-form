@@ -379,6 +379,7 @@ let InitForm = ({ fields, onChange, submitting, submitData, actions, col }) => {
                         value={item.value}
                         height={item.height}
                         rerender={item.rerender}
+                        serverURL={item.serverURL? item.serverURL:'/ngy/ngic-auth/common/uploadFile'}
                       ></Editor>
                     </Form.Item>
                   </Col>
@@ -534,7 +535,7 @@ let InitForm = ({ fields, onChange, submitting, submitData, actions, col }) => {
                 const props = rerender
                   ? {
                     name: "file",
-                    action: '/ngy/ngic-auth/common/uploadFile',
+                    action: item.serverURL?item.serverURL:'/ngy/ngic-auth/common/uploadFile',
                     listType: item.listType == "img" ? "picture-card" : 'picture',
                     multiple: item.multiple ? item.multiple : false,
                     defaultFileList: item.value ? item.value.fileList ? item.value.fileList : [] : [],

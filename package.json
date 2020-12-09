@@ -1,8 +1,8 @@
 {
   "name": "antd-auto-form",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "antd form component for high speed develop ",
-  "main": "dist/index.js",
+  "main": "dist/bundle.js",
   "registory": "b87e27b3-193b-4060-80dd-27ad3531d5ae",
   "scripts": {
     "start": "webpack-dev-server --mode development",
