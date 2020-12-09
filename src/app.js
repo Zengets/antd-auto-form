@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { Button } from 'antd'
-import { Editor, InitForm } from '../dist/bundle.js'
+import {  InitForm } from '../dist/bundle.js'
 
 let fields = {
     equipmentNo: {

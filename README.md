@@ -12,7 +12,7 @@ $ npm install antd-auto-form
 ```diff
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import {  InitForm } from '../dist/bundle.js'
+import {  InitForm } from 'antd-auto-form';
 
 let fields = {
     equipmentNo: {
@@ -51,11 +51,9 @@ let fields = {
 
 
 function App() {
-    const [state, setstate] = useState('');
-
     function saveData(values, fn) {
         console.log(values);
-        fn();//提交后重置的回调
+        fn();//提交后重置的回调 
     }
 
     return (
