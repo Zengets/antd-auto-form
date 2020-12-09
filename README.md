@@ -1,8 +1,8 @@
 # antd-auto-form
 ## ⌨️ 预览
-<div>
-<img src="http://47.100.234.193:8888/download/pic.png" title="demo"/> 
-<img src="http://47.100.234.193:8888/download/pic1.png" title="demo"/> 
+<div style="border:#f0f0f0 solid 4px">
+    <img src="http://47.100.234.193:8888/download/pic.png" title="demo"/> 
+    <img src="http://47.100.234.193:8888/download/pic1.png" title="demo"/> 
 </div>
 
 ## 📦 安装
