@@ -2,6 +2,7 @@ import React, { useRef, useState, useMemo } from 'react';
 import ProTable from '@ant-design/pro-table';
 import request from 'umi-request';
 
+
 let AutoTable = ({
   x, y,
   dataSource,
@@ -28,7 +29,11 @@ let AutoTable = ({
 
   //父组件传参改变reload
   useMemo(() => {
-    actionRefs.current && actionRefs.current.reload();
+    if(actionRef){
+      actionRef.current && actionRef.current.reload();
+    }else{
+      actionRefs.current && actionRefs.current.reload();
+    }
   }, [extraparams])
 
   let scroll = {};

@@ -3,7 +3,7 @@ import BraftEditor from 'braft-editor';
 import React, { useState, useMemo, useEffect } from 'react';
 import moment from 'moment';
 
-export default function Editor({ value, onChange, height, rerender,serverURL }) {
+export default function Editor({ value, onChange, height, rerender,serverURL,style,bordered }) {
   let [editorState, ceditor] = useState(
       BraftEditor.createEditorState(
         '<p style="text-align:start;" size="0" _root="undefined" __ownerID="undefined" __hash="undefined" __altered="false"></p>',
@@ -72,6 +72,8 @@ export default function Editor({ value, onChange, height, rerender,serverURL }) 
   return (
     <div
       style={{
+        ...style,
+        border: bordered===false?"#f9f9f9 solid 1px":'#ddd solid 1px',
         border: '#ddd solid 1px',
         height: height ? height : 400,
         overflow: 'hidden',

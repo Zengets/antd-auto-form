@@ -19,7 +19,7 @@ import ReactDOM from 'react-dom';
 import { InitForm } from 'antd-auto-form'
 
 
-// type 类型有 table treeselect upload inputnumber datepicker radio select textarea autoinput editor password input 
+// type 类型有 table treeselect upload inputnumber datepicker daterange radio select textarea autoinput editor password input 
 
 let fields = {
     equipmentNo: {
@@ -82,6 +82,22 @@ let fields = {
         name: ['positionNo'],
         required: false,
     },
+    date: {
+        value: null,
+        type: 'datepicker',
+        title: '购入日期',
+        name: ['date'],
+        format:"YYYY-MM-DD",//返回的date格式
+        required: false,
+    },
+    daterange: {
+        value: null,
+        type: 'daterange',
+        title: '预计寿命',
+        name: ['daterange'],
+        format:"YYYY",//返回的date格式
+        required: false,
+    },
     remark: {
         value: null,
         type: 'editor',
@@ -103,6 +119,7 @@ let fields = {
         
     },
 }
+
 
 function App() {
     const [state, setstate] = useState('');

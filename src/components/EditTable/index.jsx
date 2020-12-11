@@ -65,14 +65,28 @@ export default function EditTable({ value, onChange, pagination, columns, extrap
               })
               onChange(newvalue);
             }}>
-              
-
             </Select>
           }
         }
         item.render = render;
       } else if (item.selectedRender == "Input") {
-
+        let render = (_, record) => {
+          if (idlist.indexOf(record[rowKey]) == -1) {
+            return <span>{getval(item, record)}</span>
+          } else {
+            return <Input value={getval(item, record)} onChange={(e) => {
+              let val = e.target.value;
+              let newvalue = value.map((it) => {
+                if (it[rowKey] == record[rowKey]) {
+                  it[item.dataIndex] = val
+                }
+                return it
+              })
+              onChange(newvalue);
+            }}></Input>
+          }
+        }
+        item.render = render;
       }
 
 

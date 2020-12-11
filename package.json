@@ -1,6 +1,6 @@
 {
   "name": "antd-auto-form",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "antd form component for high speed develop ",
   "main": "dist/bundle.js",
   "registory": "b87e27b3-193b-4060-80dd-27ad3531d5ae",
@@ -65,6 +65,7 @@
     "antd": "^4.9.2",
     "braft-editor": "^2.3.9",
     "lodash": "^4.17.15",
+    "moment": "^2.29.1",
     "react-custom-scrollbars": "^4.2.1",
     "umi-request": "^1.3.5"
   },

@@ -4,3 +4,4 @@
 .history
 /dist
 *.log
+package-lock.json

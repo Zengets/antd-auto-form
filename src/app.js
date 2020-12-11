@@ -66,6 +66,21 @@ let fields = {
         name: ['positionNo'],
         required: false,
     },
+    date: {
+        value: null,
+        type: 'datepicker',
+        title: '购入日期',
+        name: ['date'],
+        required: false,
+    },
+    daterange: {
+        value: null,
+        type: 'daterange',
+        title: '预计寿命',
+        name: ['daterange'],
+        format:"YYYY",
+        required: false,
+    },
     remark: {
         value: null,
         type: 'editor',

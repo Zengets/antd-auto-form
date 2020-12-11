@@ -12,55 +12,109 @@ import {
   TreeSelect,
   Button,
   AutoComplete,
-  Drawer
+  Drawer,
+  ConfigProvider
 } from 'antd';
+import moment from 'moment';
 import React, { useEffect, useMemo, useState } from 'react';
 import { LoadingOutlined, UploadOutlined } from '@ant-design/icons';
 import { PlusOutlined } from "@ant-design/icons"
 import EditTable from '../EditTable/index.jsx';
 import Editor from '../Editor/index.jsx';
+import mockfile from './mockfile.js'
+import zhCN from 'antd/lib/locale/zh_CN';
+moment.locale('zh-cn');
 
 const { TreeNode } = TreeSelect;
+const { RangePicker } = DatePicker;
 let { Option } = Select;
 
-let InitForm = ({ fields, onChange, submitting, submitData, actions, col }) => {
+let loop = (data) => (data && data.length > 0) && data.map(item => {
+  const title = <span>{item.title}</span>;
+  if (item.children) {
+    return (
+      <TreeNode value={item.key} key={item.key} title={title}>
+        {loop(item.children)}
+      </TreeNode>
+    );
+  } else {
+    return <TreeNode value={item.key} key={item.key} title={title} />;
+  }
+});
+
+
+function formartData(item, val) {
+  let formartValue = val;
+  if (item.type == "upload") {
+    let stepval = val ? Array.isArray(val) ? val : val.fileList : [];
+    formartValue = stepval.map((it) => {
+      if (it.response) {
+        return it.response.data.dataList[0]
+      } else {
+        return it.url ? it.url : null
+      }
+    })
+    if (item.limit == 1) {
+      formartValue = formartValue[0] ? formartValue[0] : ""
+    }
+  } else if (item.type == "datepicker") {
+    formartValue = val ? val.format(item.format?item.format:"YYYY-MM-DD") : null
+  } else if (item.type == "daterange") {
+    formartValue = val && Array.isArray(val) ? val.map((it => it ? moment(it).format(item.format?item.format:"YYYY-MM-DD") : null)) : []
+  }
+  return formartValue
+}
+
+
+
+
+
+let InitForm = ({ fields, onChange, submitting, submitData, actions, col, mode, formRef, style }) => {
   let [Dom, cDom] = useState([]),
     [cururl, setcururl] = useState(""),
     [loading, sload] = useState(false),
-    [rerender, srerender] = useState(true);
-  const [form] = Form.useForm(), [filelist, cfilelist] = useState({}), [link, clink] = useState({}), [belink, cbelink] = useState({});
-  const [visible, setVisible] = useState(false), [optiondom, cdom] = useState({});
+    [form] = Form.useForm(),
+    [filelist, cfilelist] = useState({}),
+    [link, clink] = useState({}),
+    [belink, cbelink] = useState({}),
+    [visible, setVisible] = useState(false),
+    [optiondom, cdom] = useState({});
+
+  form = formRef ? formRef : form;
 
 
   useEffect(() => {
-    srerender(false);
     let Doms = [], klink = {}, belinked = {}, defaultfiles = {};
     for (let i in fields) {
-      Doms.push(fields[i]);
+      let record = fields[i];
       //获取linked key
-      if (fields[i].linked === true) {
-        klink[i] = fields[i].value;
+      if (record.linked === true) {
+        klink[i] = record.value;
       }
       //获取belinked key
-      if (fields[i].belinked) {
-        belinked[i] = fields[i].belinked;
+      if (record.belinked) {
+        belinked[i] = record.belinked;
       }
       //初始化filelist
-      if (fields[i].type === "upload") {
-        let item = fields[i],
+      if (record.type === "upload") {
+        let item = record,
           curfileList = item.value ? item.value.fileList ? item.value.fileList : item.value : [];
-        defaultfiles[i] = curfileList
+        defaultfiles[i] = curfileList;
+        //formart value
+        record.value = record.value ? mockfile(Array.isArray(record.value) ? record.value : [record.value]) : [];
+      } else if (record.type === "datepicker") {
+        record.value = record.value ? moment(record.value) : undefined;
+      } else if (record.type === "daterange") {
+        record.value = record.value && Array.isArray(record.value) ? record.value.map(it => it && moment(it)) : [];
       }
+
+      Doms.push(record);
     }
     clink(klink);
     cbelink(belinked);
     cfilelist(defaultfiles);
-    setTimeout(() => {
-      srerender(true);
-    }, 1);
     cDom(Doms);
   }, [fields]);
-
 
   useEffect(() => {
     //联动数据
@@ -70,7 +124,6 @@ let InitForm = ({ fields, onChange, submitting, submitData, actions, col }) => {
       getOptions(options, fields[i]);
     }
   }, [link])
-
 
   const getCol = (itemcol) => {
     if (itemcol) {
@@ -100,20 +153,6 @@ let InitForm = ({ fields, onChange, submitting, submitData, actions, col }) => {
     }
     return extraparams;
   }
-
-  //   [
-  //     { //联动隐藏条件 equalvalue 与 unequalvalue 只能存在1个
-  //         name:"isOriginal",
-  //         unequalvalue:"1,4",
-  //         required:true  
-  //     },
-  //     {
-  //         name:"releaseTitle",
-  //         equalvalue:"",
-  //         required:true
-  //     }
-  //  ],
-
 
   //下拉框联动声明
   const getSelectLinked = (item) => {
@@ -182,44 +221,15 @@ let InitForm = ({ fields, onChange, submitting, submitData, actions, col }) => {
     }
   }
 
-
-
-  let loop = (data) => (data && data.length > 0) && data.map(item => {
-    const title = <span>{item.title}</span>;
-    if (item.children) {
-      return (
-        <TreeNode value={item.key} key={item.key} title={title}>
-          {loop(item.children)}
-        </TreeNode>
-      );
-    } else {
-      return <TreeNode value={item.key} key={item.key} title={title} />;
-    }
-  });
-
+  //格式化数据提交
   function formartSubmit(values) {
     let newvalue = { ...values };
     for (let i in fields) {
-      if (fields[i].type == "upload") {
-        let stepval = values[i] ? Array.isArray(values[i]) ? values[i] : values[i].fileList : [];
-        newvalue[i] = stepval.map((it) => {
-          if (it.response) {
-            return it.response.data.dataList[0]
-          } else {
-            return it.url ? it.url : null
-          }
-        })
-        if (fields[i].limit == 1) {
-          newvalue[i] = newvalue[i][0] ? newvalue[i][0] : ""
-        }
-      } else if (fields[i].type == "datepicker") {
-        newvalue[i] = values[i] ? values[i].format("YYYY-MM-DD") : null
-      }
+      newvalue[i] = formartData(fields[i], values[i])
     }
     submitData(newvalue, () => {
       form.resetFields();
     })
-
   }
 
   const submitBtn = (<Button
@@ -286,256 +296,312 @@ let InitForm = ({ fields, onChange, submitting, submitData, actions, col }) => {
 
 
   return (
-    <div>
-      <Drawer
-        title="预览"
-        placement="top"
-        closable={true}
-        onClose={() => { setVisible(false) }}
-        visible={visible}
-        height="100%"
-      >
-        <div style={{ width: "100%", height: "100%", backgroundImage: `url(${cururl})`, backgroundSize: "contain", backgroundRepeat: "no-repeat", backgroundPosition: "center" }}></div>
-      </Drawer>
-      <Form
-        form={form}
-        name="initform"
-        layout="vertical"
-        fields={Dom}
-        onFinish={values => { formartSubmit(values) }}
-        onValuesChange={(changedValues, allValues) => {
-          onChange(changedValues, allValues);
-          //联动逻辑
-          let linkkey = Object.keys(changedValues)[0];
-          for (let i in link) {
-            if (i == linkkey) {
-              clink({
-                ...link,
-                [i]: changedValues[i] //state修改当前value
-              })
-              //重置
-              if (fields[i].linked) {
-                let keyarr = [];
-                for (let index in belink) {
-                  if (belink[index].options && Object.keys(belink[index].options.params).indexOf(i) != -1) {
-                    keyarr.push(index)
+    <div style={style}>
+      <ConfigProvider locale={zhCN}>
+        <Drawer
+          title="预览"
+          placement="top"
+          closable={true}
+          onClose={() => { setVisible(false) }}
+          visible={visible}
+          height="100%"
+        >
+          <div style={{ width: "100%", height: "100%", backgroundImage: `url(${cururl})`, backgroundSize: "contain", backgroundRepeat: "no-repeat", backgroundPosition: "center" }}></div>
+        </Drawer>
+        <Form
+          form={form}
+          name="initform"
+          layout="vertical"
+          fields={Dom}
+          onFinish={values => { formartSubmit(values) }}
+          onValuesChange={(changedValues, values) => {
+            let newvalue = {};
+            let linkkey = Object.keys(changedValues)[0];
+            //联动逻辑
+            for (let i in link) {
+              if (i == linkkey) {
+                clink({
+                  ...link,
+                  [i]: changedValues[i] //state修改当前value
+                })
+                //重置
+                if (fields[i].linked) {
+                  let keyarr = [];
+                  for (let index in belink) {
+                    if (belink[index].options && Object.keys(belink[index].options.params).indexOf(i) != -1) {
+                      keyarr.push(index)
+                    }
                   }
+                  keyarr.map((it) => form.setFieldsValue({ [it]: "" }))
                 }
-                keyarr.map((it) => form.setFieldsValue({ [it]: "" }))
               }
             }
-          }
-        }}
-      >
-        <Row gutter={24}>
-          {Dom.map(
-            (item, i) => {
-              let extraprops = getSelectLinked(item);
-              let { options } = extraprops;
-              if (item.type == 'input' || item.type == 'password') {
-                return !extraprops.hides ? (
-                  <Col key={i} {...getCol(item.col)}>
-                    <Form.Item
-                      style={{}}
-                      label={item.title}
-                      name={item.name[0]}
-                      rules={[
-                        {
-                          required: item.required,
-                          message: `请输入${item.title}`,
-                        },
-                        item.name[0].indexOf('phone') != -1
-                          ? {
-                            pattern: /^\d{11}$/,
-                            message: '手机号格式不正确',
-                          }
-                          : item.name[0].indexOf('mail') != -1
+
+            let allValues = form.getFieldsValue();
+            for (let i in fields) {
+              newvalue[i] = formartData(fields[i], allValues[i]);
+              if (linkkey == i) {
+                changedValues[i] = formartData(fields[i], allValues[i]);
+              }
+            }
+
+            onChange(changedValues, newvalue);
+
+
+          }}
+        >
+          <Row gutter={24}>
+            {Dom.map(
+              (item, i) => {
+                let extraprops = getSelectLinked(item);
+                let { options } = extraprops;
+                if (item.type == 'input' || item.type == 'password') {
+                  return !extraprops.hides ? (
+                    <Col key={i} {...getCol(item.col)}>
+                      <Form.Item
+                        style={{}}
+                        label={item.title}
+                        name={item.name[0]}
+                        rules={[
+                          {
+                            required: item.required,
+                            message: `请输入${item.title}`,
+                          },
+                          item.name[0].indexOf('phone') != -1
                             ? {
-                              pattern: /^[a-z0-9A-Z]+[- | a-z0-9A-Z . _]+@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\.)+[a-z]{2,}$/,
-                              message: '邮箱格式不正确',
+                              pattern: /^\d{11}$/,
+                              message: '手机号格式不正确',
                             }
-                            : {},
-                      ]}
-                    >
-                      <Input allowClear type={item.type} maxLength={100} disabled={item.disabled} />
-                    </Form.Item>
-                  </Col>
-                ) : null;
-              } else if (item.type == 'editor') {
-                return !extraprops.hides ? (
-                  <Col key={i} {...getCol(item.col)}>
-                    <Form.Item
-                      style={{}}
-                      label={item.title}
-                      name={item.name[0]}
-                      rules={[
-                        {
-                          required: item.required,
-                          message: `请输入${item.title}`,
-                        },
-                      ]}
-                    >
-                      <Editor
-                        value={item.value}
-                        height={item.height}
-                        rerender={item.rerender}
-                        serverURL={item.serverURL? item.serverURL:'/ngy/ngic-auth/common/uploadFile'}
-                      ></Editor>
-                    </Form.Item>
-                  </Col>
-                ) : null;
-              } else if (item.type == 'autoinput') {
-                return !extraprops.hides ? (
-                  <Col key={i} {...getCol(item.col)}>
-                    <Form.Item
-                      style={{}}
-                      label={item.title}
-                      name={item.name[0]}
-                      rules={[
-                        {
-                          required: item.required,
-                          message: `请输入${item.title}`
-                        },
-                      ]}
-                    >
-                      <AutoComplete
-                        allowClear
-                        disabled={item.disabled}
-                        options={item.dataSource}
-                        filterOption={(inputValue, option) => {
-                          return option.value && option.value.toString().indexOf(inputValue) !== -1
-                        }}
-                      />
-                    </Form.Item>
-                  </Col>
-                ) : null;
-              } else if (item.type == 'textarea') {
-                return !extraprops.hides ? (
-                  <Col key={i} {...getCol(item.col)}>
-                    <Form.Item
-                      style={{}}
-                      label={item.title}
-                      name={item.name[0]}
-                      rules={[
-                        { required: item.required, message: `请输入${item.title}` },
-                      ]}
-                    >
-                      <Input.TextArea
-                        maxLength={600}
-                        rows={4}
-                        allowClear
-                        disabled={item.disabled}
-                      />
-                    </Form.Item>
-                  </Col>
-                ) : null;
-              } else if (item.type == 'select') {
-                return !extraprops.hides ? (
-                  <Col key={i} {...getCol(item.col)}>
-                    <Form.Item
-                      style={{}}
-                      label={item.title}
-                      name={item.name[0]}
-                      rules={[
-                        { required: item.required, message: `请选择${item.title}` },
-                      ]}
-                    >
-                      <Select
-                        allowClear
-                        placeholder="请选择"
-                        style={{ width: '100%' }}
-                        showSearch
-                        mode={item.multiple ? 'multiple' : ''}
-                        filterOption={(input, option) =>
-                          option.props.children
-                            .toLowerCase()
-                            .indexOf(input.toLowerCase()) >= 0
-                        }
-                        disabled={item.disabled}
+                            : item.name[0].indexOf('mail') != -1
+                              ? {
+                                pattern: /^[a-z0-9A-Z]+[- | a-z0-9A-Z . _]+@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\.)+[a-z]{2,}$/,
+                                message: '邮箱格式不正确',
+                              }
+                              : {},
+                        ]}
                       >
-                        {
-                          (optiondom[item.name[0]] && optiondom[item.name[0]].length > 0) && optiondom[item.name[0]].filter(it => !it.hides).map((it, n) => {
-                            return (
-                              <Option disabled={it.disabled} key={n} value={it.dicKey ? it.dicKey : it.value}>
-                                {it.dicName ? it.dicName : it.label}
-                              </Option>
-                            );
-                          })
-                        }
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                ) : null;
-              } else if (item.type == 'radio') {
-                return !extraprops.hides ? (
-                  <Col key={i} {...getCol(item.col)}>
-                    <Form.Item
-                      style={{}}
-                      label={item.title}
-                      name={item.name[0]}
-                      rules={[
-                        { required: item.required, message: `请选择${item.title}` },
-                      ]}
-                    >
-                      <Radio.Group
-                        options={
-                          (optiondom[item.name[0]] && optiondom[item.name[0]].length > 0)
-                          &&
-                          optiondom[item.name[0]]
-                        }
-                      />
-                    </Form.Item>
-                  </Col>
-                ) : null;
-              } else if (item.type == 'datepicker') {
-                return !extraprops.hides ? (
-                  <Col key={i} {...getCol(item.col)}>
-                    <Form.Item
-                      style={{}}
-                      label={item.title}
-                      name={item.name[0]}
-                      rules={[
-                        { required: item.required, message: `请选择${item.title}` },
-                      ]}
-                    >
-                      <DatePicker
-                        disabledDate={item.disabledDate ? item.disabledDate : null}
-                        disabledTime={
-                          item.disabledDateTime ? item.disabledDateTime : null
-                        }
-                        style={{ width: '100%' }}
-                        showTime={item.showTime}
-                        format={item.format}
-                        disabled={item.disabled}
-                      />
-                    </Form.Item>
-                  </Col>
-                ) : null;
-              } else if (item.type == 'inputnumber') {
-                return !extraprops.hides ? (
-                  <Col key={i} {...getCol(item.col)}>
-                    <Form.Item
-                      style={{}}
-                      label={item.title}
-                      name={item.name[0]}
-                      rules={[
-                        { required: item.required, message: `请输入${item.title}` },
-                      ]}
-                    >
-                      <InputNumber
-                        style={{ width: '100%' }}
-                        disabled={item.disabled}
-                        min={item.min ? item.min : 0}
-                        max={item.max}
-                      />
-                    </Form.Item>
-                  </Col>
-                ) : null;
-              } else if (item.type == 'upload') {
-                const props = rerender
-                  ? {
+                        <Input
+                          bordered={mode == "simple" ? false : true}
+                          className={mode == "simple" ? "simple" : ""}
+                          placeholder={item.title}
+                          allowClear
+                          type={item.type}
+                          maxLength={100}
+                          disabled={item.disabled} />
+                      </Form.Item>
+                    </Col>
+                  ) : null;
+                } else if (item.type == 'editor') {
+                  return !extraprops.hides ? (
+                    <Col key={i} {...getCol(item.col)}>
+                      <Form.Item
+                        style={{}}
+                        label={item.title}
+                        name={item.name[0]}
+                        rules={[
+                          {
+                            required: item.required,
+                            message: `请输入${item.title}`,
+                          },
+                        ]}
+                      >
+                        <Editor
+                          bordered={mode == "simple" ? false : true}
+                          className={mode == "simple" ? "simple" : ""}
+                          value={item.value}
+                          height={item.height}
+                          rerender={item.rerender}
+                          serverURL={item.serverURL ? item.serverURL : '/ngy/ngic-auth/common/uploadFile'}
+                        ></Editor>
+                      </Form.Item>
+                    </Col>
+                  ) : null;
+                } else if (item.type == 'autoinput') {
+                  return !extraprops.hides ? (
+                    <Col key={i} {...getCol(item.col)}>
+                      <Form.Item
+                        style={{}}
+                        label={item.title}
+                        name={item.name[0]}
+                        rules={[
+                          {
+                            required: item.required,
+                            message: `请输入${item.title}`
+                          },
+                        ]}
+                      >
+                        <AutoComplete
+                          allowClear
+                          disabled={item.disabled}
+                          options={item.dataSource}
+                          bordered={mode == "simple" ? false : true}
+                          className={mode == "simple" ? "simple" : ""}
+                          filterOption={(inputValue, option) => {
+                            return option.value && option.value.toString().indexOf(inputValue) !== -1
+                          }}
+                        />
+                      </Form.Item>
+                    </Col>
+                  ) : null;
+                } else if (item.type == 'textarea') {
+                  return !extraprops.hides ? (
+                    <Col key={i} {...getCol(item.col)}>
+                      <Form.Item
+                        style={{}}
+                        label={item.title}
+                        name={item.name[0]}
+                        rules={[
+                          { required: item.required, message: `请输入${item.title}` },
+                        ]}
+                      >
+                        <Input.TextArea
+                          maxLength={600}
+                          rows={4}
+                          allowClear
+                          disabled={item.disabled}
+                          bordered={mode == "simple" ? false : true}
+                          className={mode == "simple" ? "simple" : ""}
+                        />
+                      </Form.Item>
+                    </Col>
+                  ) : null;
+                } else if (item.type == 'select') {
+                  return !extraprops.hides ? (
+                    <Col key={i} {...getCol(item.col)}>
+                      <Form.Item
+                        style={{}}
+                        label={item.title}
+                        name={item.name[0]}
+                        rules={[
+                          { required: item.required, message: `请选择${item.title}` },
+                        ]}
+                      >
+                        <Select
+                          allowClear
+                          placeholder="请选择"
+                          style={{ width: '100%' }}
+                          showSearch
+                          mode={item.multiple ? 'multiple' : ''}
+                          filterOption={(input, option) =>
+                            option.props.children
+                              .toLowerCase()
+                              .indexOf(input.toLowerCase()) >= 0
+                          }
+                          disabled={item.disabled}
+                          bordered={mode == "simple" ? false : true}
+                          className={mode == "simple" ? "simple" : ""}
+                        >
+                          {
+                            (optiondom[item.name[0]] && optiondom[item.name[0]].length > 0) && optiondom[item.name[0]].filter(it => !it.hides).map((it, n) => {
+                              return (
+                                <Option disabled={it.disabled} key={n} value={it.dicKey ? it.dicKey : it.value}>
+                                  {it.dicName ? it.dicName : it.label}
+                                </Option>
+                              );
+                            })
+                          }
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                  ) : null;
+                } else if (item.type == 'radio') {
+                  return !extraprops.hides ? (
+                    <Col key={i} {...getCol(item.col)}>
+                      <Form.Item
+                        style={{}}
+                        label={item.title}
+                        name={item.name[0]}
+                        rules={[
+                          { required: item.required, message: `请选择${item.title}` },
+                        ]}
+                      >
+                        <Radio.Group
+                          options={
+                            (optiondom[item.name[0]] && optiondom[item.name[0]].length > 0)
+                            &&
+                            optiondom[item.name[0]]
+                          }
+                        />
+                      </Form.Item>
+                    </Col>
+                  ) : null;
+                } else if (item.type == 'datepicker') {
+                  return !extraprops.hides ? (
+                    <Col key={i} {...getCol(item.col)}>
+                      <Form.Item
+                        style={{}}
+                        label={item.title}
+                        name={item.name[0]}
+                        rules={[
+                          { required: item.required, message: `请选择${item.title}` },
+                        ]}
+                      >
+                        <DatePicker
+                          className={mode == "simple" ? "simple" : ""}
+                          style={{ width: '100%' }}
+                          disabledDate={item.disabledDate ? item.disabledDate : null}
+                          disabledTime={
+                            item.disabledDateTime ? item.disabledDateTime : null
+                          }
+                          showToday={true}
+                          showTime={item.showTime}
+                          format={item.format}
+                          disabled={item.disabled}
+                        />
+                      </Form.Item>
+                    </Col>
+                  ) : null;
+                } else if (item.type == 'daterange') {
+                  return !extraprops.hides ? (
+                    <Col key={i} {...getCol(item.col)}>
+                      <Form.Item
+                        label={item.title}
+                        name={item.name[0]}
+                        rules={[
+                          { required: item.required, message: `请选择${item.title}` },
+                        ]}
+                      >
+                        <RangePicker
+                          className={mode == "simple" ? "simple" : ""}
+                          style={{ width: '100%' }}
+                          disabledDate={item.disabledDate ? item.disabledDate : null}
+                          disabledTime={
+                            item.disabledDateTime ? item.disabledDateTime : null
+                          }
+                          format={item.format}
+                          showToday={true}
+                          showTime={item.showTime}
+                          disabled={item.disabled}
+                        />
+                      </Form.Item>
+                    </Col>
+                  ) : null;
+                } else if (item.type == 'inputnumber') {
+                  return !extraprops.hides ? (
+                    <Col key={i} {...getCol(item.col)}>
+                      <Form.Item
+                        style={{}}
+                        label={item.title}
+                        name={item.name[0]}
+                        rules={[
+                          { required: item.required, message: `请输入${item.title}` },
+                        ]}
+                      >
+                        <InputNumber
+                          bordered={mode == "simple" ? false : true}
+                          className={mode == "simple" ? "simple" : ""}
+                          style={{ width: '100%' }}
+                          disabled={item.disabled}
+                          min={item.min ? item.min : 0}
+                          max={item.max}
+                        />
+                      </Form.Item>
+                    </Col>
+                  ) : null;
+                } else if (item.type == 'upload') {
+                  const props = {
                     name: "file",
-                    action: item.serverURL?item.serverURL:'/ngy/ngic-auth/common/uploadFile',
+                    action: item.serverURL ? item.serverURL : '/ngy/ngic-auth/common/uploadFile',
                     listType: item.listType == "img" ? "picture-card" : 'picture',
                     multiple: item.multiple ? item.multiple : false,
                     defaultFileList: item.value ? item.value.fileList ? item.value.fileList : [] : [],
@@ -562,100 +628,100 @@ let InitForm = ({ fields, onChange, submitting, submitData, actions, col }) => {
                       }
                       setVisible(true);
                     }
-                  }
-                  : {};
-                const uploadBtn = (
-                  <div>
-                    <PlusOutlined />
-                    <div style={{ marginTop: 8 }}>上传</div>
-                  </div>
-                ),
-                  limit = item.limit ? item.limit : 1000;
+                  };
+                  const uploadBtn = (
+                    <div>
+                      <PlusOutlined />
+                      <div style={{ marginTop: 8 }}>上传</div>
+                    </div>
+                  ),
+                    limit = item.limit ? item.limit : 1000;
 
 
-                return !extraprops.hides && rerender ? (
-                  <Col key={i} {...getCol(item.col)}>
-                    <Form.Item
-                      style={{}}
-                      label={item.title}
-                      name={item.name[0]}
-                      rules={[
-                        { required: item.required, message: `请选择${item.title}` },
-                      ]}
-                    >
-                      <Upload {...props} style={{ width: '100%' }}>
-                        {
-                          (filelist[item.name[0]] && filelist[item.name[0]].length > limit - 1) ? null : uploadBtn
-                        }
-                      </Upload>
-                    </Form.Item>
-                  </Col>
-                ) : null;
-              } else if (item.type == 'treeselect') {
-                return !extraprops.hides ? (
-                  <Col key={i} {...getCol(item.col)}>
-                    <Form.Item
-                      style={{}}
-                      label={item.title}
-                      name={item.name[0]}
-                      rules={[
-                        { required: item.required, message: `请选择${item.title}` },
-                      ]}
-                    >
-                      <TreeSelect
-                        style={{ width: '100%' }}
-                        dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-                        disabled={item.disabled}
-                        allowClear
-                        treeDefaultExpandAll
-                        placeholder={`请选择...`}
+                  return !extraprops.hides ? (
+                    <Col key={i} {...getCol(item.col)}>
+                      <Form.Item
+                        style={{}}
+                        label={item.title}
+                        name={item.name[0]}
+                        rules={[
+                          { required: item.required, message: `请选择${item.title}` },
+                        ]}
                       >
-                        {options && loop(options)}
-
-                        {
-                          (optiondom[item.name[0]] && optiondom[item.name[0]].length > 0) &&
-                          loop(optiondom[item.name[0]])
-                        }
-                      </TreeSelect>
-                    </Form.Item>
-                  </Col>
-                ) : null;
-              } else if (item.type == 'table') {
-                let extraparams = getTableLinked(item);//声明需要被联动
-                return !extraprops.hides ? (
-                  <Col key={i} {...getCol(item.col)}>
-                    <Form.Item
-                      style={{}}
-                      label={item.title}
-                      name={item.name[0]}
-                      rules={[
-                        { required: item.required, message: `请输入${item.title}` },
-                      ]}
-                    >
-                      <EditTable
-                        columns={item.columns}
-                        extraparams={extraparams}
-                        path={item.path}
-                        editable={item.editable}
-                        rowKey={item.rowKey}
-                        rowName={item.rowName}
-                        pagination={item.pagination}
+                        <Upload {...props} style={{ width: '100%' }}>
+                          {
+                            (filelist[item.name[0]] && filelist[item.name[0]].length > limit - 1) ? null : uploadBtn
+                          }
+                        </Upload>
+                      </Form.Item>
+                    </Col>
+                  ) : null;
+                } else if (item.type == 'treeselect') {
+                  return !extraprops.hides ? (
+                    <Col key={i} {...getCol(item.col)}>
+                      <Form.Item
+                        style={{}}
+                        label={item.title}
+                        name={item.name[0]}
+                        rules={[
+                          { required: item.required, message: `请选择${item.title}` },
+                        ]}
                       >
-                      </EditTable>
-                    </Form.Item>
-                  </Col>
-                ) : null;
-              }
-            })}
-          <Col span={24} style={{ padding: 12 }}>
-            {actions ? (
-              actions(form, submitBtn)
-            ) : (
-                submitBtn
-              )}
-          </Col>
-        </Row>
-      </Form>
+                        <TreeSelect
+                          style={{ width: '100%' }}
+                          dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                          disabled={item.disabled}
+                          allowClear
+                          treeDefaultExpandAll
+                          placeholder={`请选择...`}
+                        >
+                          {options && loop(options)}
+
+                          {
+                            (optiondom[item.name[0]] && optiondom[item.name[0]].length > 0) &&
+                            loop(optiondom[item.name[0]])
+                          }
+                        </TreeSelect>
+                      </Form.Item>
+                    </Col>
+                  ) : null;
+                } else if (item.type == 'table') {
+                  let extraparams = getTableLinked(item);//声明需要被联动
+                  return !extraprops.hides ? (
+                    <Col key={i} {...getCol(item.col)}>
+                      <Form.Item
+                        style={{}}
+                        label={item.title}
+                        name={item.name[0]}
+                        rules={[
+                          { required: item.required, message: `请输入${item.title}` },
+                        ]}
+                      >
+                        <EditTable
+                          columns={item.columns}
+                          extraparams={extraparams}
+                          path={item.path}
+                          editable={item.editable}
+                          rowKey={item.rowKey}
+                          rowName={item.rowName}
+                          pagination={item.pagination}
+                        >
+                        </EditTable>
+                      </Form.Item>
+                    </Col>
+                  ) : null;
+                }
+              })}
+            <Col span={24} style={{ padding: 12 }}>
+              {actions ? (
+                actions(form, submitBtn)
+              ) : (
+                  submitBtn
+                )}
+            </Col>
+          </Row>
+        </Form>
+      </ConfigProvider>
     </div>
   );
 };
