@@ -56,15 +56,23 @@ export default function EditTable({ value, onChange, pagination, columns, extrap
           if (idlist.indexOf(record[rowKey]) == -1) {
             return <span>{getval(item, record)}</span>
           } else {
-            return <Select value={getval(item, record)} onChange={(val) => {
-              let newvalue = value.map((it) => {
-                if (it[rowKey] == record[rowKey]) {
-                  it[item.dataIndex] = val
-                }
-                return it
-              })
-              onChange(newvalue);
-            }}>
+            return <Select
+              mode={item.mode} //mode == 'multiple'多选
+              value={getval(item, record)}
+              onChange={(val) => {
+                let newvalue = value.map((it) => {
+                  if (it[rowKey] == record[rowKey]) {
+                    it[item.dataIndex] = val
+                  }
+                  return it
+                })
+                onChange(newvalue);
+              }}>
+              {
+                Array.isArray(item.options) ?
+                  item.options.map((it, i) => <Option key={i} value={it.value}>{it.label}</Option>) :
+                  record[item.options].map((it, i) => <Option key={i} value={it.value}>{it.label}</Option>)
+              }
             </Select>
           }
         }
