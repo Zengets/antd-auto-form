@@ -58,9 +58,9 @@ function formartData(item, val) {
       formartValue = formartValue[0] ? formartValue[0] : ""
     }
   } else if (item.type == "datepicker") {
-    formartValue = val ? val.format(item.format?item.format:"YYYY-MM-DD") : null
+    formartValue = val ? val.format(item.format ? item.format : "YYYY-MM-DD") : null
   } else if (item.type == "daterange") {
-    formartValue = val && Array.isArray(val) ? val.map((it => it ? moment(it).format(item.format?item.format:"YYYY-MM-DD") : null)) : []
+    formartValue = val && Array.isArray(val) ? val.map((it => it ? moment(it).format(item.format ? item.format : "YYYY-MM-DD") : null)) : []
   }
   return formartValue
 }
@@ -602,7 +602,7 @@ let InitForm = ({ fields, onChange, submitting, submitData, actions, col, mode, 
                   const props = {
                     name: "file",
                     action: item.serverURL ? item.serverURL : '/ngy/ngic-auth/common/uploadFile',
-                    listType: item.listType == "img" ? "picture-card" : 'picture',
+                    listType: item.listType == "img" ? "picture-card" : 'text',
                     multiple: item.multiple ? item.multiple : false,
                     defaultFileList: item.value ? item.value.fileList ? item.value.fileList : [] : [],
                     onChange(info) {
@@ -629,12 +629,15 @@ let InitForm = ({ fields, onChange, submitting, submitData, actions, col, mode, 
                       setVisible(true);
                     }
                   };
-                  const uploadBtn = (
-                    <div>
-                      <PlusOutlined />
-                      <div style={{ marginTop: 8 }}>上传</div>
-                    </div>
-                  ),
+                  const uploadBtn =
+                    item.listType == 'img' ? (
+                      <div>
+                        <PlusOutlined />
+                        <div style={{ marginTop: 8 }}>上传</div>
+                      </div>
+                    ) : (
+                        <Button icon={<UploadOutlined />}>上传</Button>
+                      ),
                     limit = item.limit ? item.limit : 1000;
 
 
