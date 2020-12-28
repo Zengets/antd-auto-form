@@ -610,12 +610,11 @@ let InitForm = ({ fields, onChange, submitting, submitData, actions, col, mode, 
                         file: { name, status, response },
                         fileList,
                       } = info;
-                      cfilelist({
-                        ...filelist,
-                        [item.name[0]]: fileList
-                      })
-
                       if (status == 'done') {
+                        cfilelist({
+                          ...filelist,
+                          [item.name[0]]: fileList
+                        })
                       } else if (status == 'error') {
                         message.error(`${info.file.name} 上传失败`);
                       }
