@@ -162,3 +162,55 @@ npm start
 ```
 访问 http://localhost:8080
 
+
+## 后端接口规范
+### 1.AutoTable 组件
+```diff
+表格分页 
+传参 ：{ pageIndex:"页码",pageSize:"每页条数"}
+返回格式 { code:"状态码",data:{total:"总条数",list:['分页数据放在这']},msg:"操作msg"}
+-------------------
+表格不分页
+返回格式 { code:"状态码",data:{dataList:['分页数据放在这']},msg:"操作msg"}
+```
+### 2.InitForm 组件
+```diff
+单选 下拉框 自动补全输入框(options)  radio select autoinput
+返回格式 { code:"状态码",data:{dataList:[
+    {label:"下拉框文字",value:"下拉框id"}
+    ]},msg:"操作msg"}
+--------------------
+树形下拉框 treeselect
+返回格式 { code:"状态码",data:{dataList:[
+  {
+    title: 'Node1',
+    value: '0-0',
+    children: [
+      {
+        title: 'Child Node1',
+        value: '0-0-1',
+      },
+      {
+        title: 'Child Node2',
+        value: '0-0-2',
+      },
+    ],
+  },
+  {
+    title: 'Node2',
+    value: '0-1',
+  },
+]},msg:"操作msg"}
+--------------------
+上传组件 upload 可上传多个
+返回格式 { code:"状态码",data:{dataList:[
+   "文件上传后服务器地址1",
+   "文件上传后服务器地址2" 
+]},msg:"操作msg"}
+--------------------
+表格选择/填空组件 table
+返回格式 { code:"状态码",data:{
+    page/dataList(分页/不分页),selectedList:['选中的id']
+},msg:"操作msg"}
+
+```
