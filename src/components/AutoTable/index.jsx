@@ -5,6 +5,8 @@ import request from 'umi-request';
 
 let defaultsize = localStorage.getItem("size");//设置缓存
 
+
+
 class AutoTable extends PureComponent {
   state = {
     total: 100,
@@ -40,10 +42,10 @@ class AutoTable extends PureComponent {
       tableRender, //表格布局自定义
       getDefaultSelected, //获取默认选中的数据
       rowClassNameFn, //选中后行样式
-      showQuickJumper //false字符串 不显示
+      showQuickJumper, //false字符串 不显示
+      showSizeChanger
     } = this.props,
       { total, size } = this.state;
-
 
     let scroll = {};
     if (y) {
@@ -65,6 +67,7 @@ class AutoTable extends PureComponent {
         pagination: {
           showTotal: (total, range) => <span>共{total}条</span>,
           showQuickJumper: false,
+          showSizeChanger: false,
           pageSize: defaultPageSize ? defaultPageSize : 15,
           pageSizeOptions: [10, 15, 30, 50, 100, 200],
           total: dataSource.length
@@ -85,7 +88,7 @@ class AutoTable extends PureComponent {
           let token = localStorage.getItem("TOKEN") ? localStorage.getItem("TOKEN") : "b60ef0c40b7f1b7e63c2b24b127988d4";
           let headers = {
             'Content-Type': 'application/json',
-            'token': token ? token : '',
+            [window?.dataconfig?.tableTokenkey ? window.dataconfig.tableTokenkey : 'token']: token ? token : '',
           };
           //处理传参 extraparams为除列筛选外的自定义传参
           let newparams = {
@@ -101,12 +104,13 @@ class AutoTable extends PureComponent {
           return request(path, {
             body: JSON.stringify(newparams ? newparams : {}),
             headers,
-            method: 'POST',
+            method: window?.dataconfig?.tableMethod? window.dataconfig.tableMethod:'POST',
           })
         },
         pagination: {
           showTotal: (total, range) => <span>共{total}条</span>,
-          showQuickJumper: !showQuickJumper ? true : false,
+          showQuickJumper: showQuickJumper===false ? true : false,
+          showSizeChanger: showSizeChanger===false ? true : false,
           pageSize: defaultPageSize ? defaultPageSize : 15,
           pageSizeOptions: [5, 10, 15, 30, 50, 100, 200],
           total

@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { InitForm } from './components/index.js'
+import { InitForm, AutoTable } from './components/index'
 
 
 // type 类型有 table treeselect upload inputnumber datepicker radio select textarea autoinput editor password input 
+window.dataconfig = {
+    tableMethod: "GET", //表格调用接口方式
+    tableTokenkey: "Authorization", //token key
+    serverURL: "" //上传的默认地址
+}
+
 
 let fields = {
     equipmentNo: {
@@ -78,7 +84,7 @@ let fields = {
         type: 'daterange',
         title: '预计寿命',
         name: ['daterange'],
-        format:"YYYY",
+        format: "YYYY",
         required: false,
     },
     remark: {
@@ -99,11 +105,12 @@ let fields = {
         listType: "img",//上传展示类型
         limit: 1, //限制图片上传数量
         col: { span: 24 },
-        
+
     },
 }
 
 function App() {
+
     const [state, setstate] = useState('');
 
     function saveData(values, fn) {
@@ -125,6 +132,13 @@ function App() {
                     submitting={false} //接口submit状态
                 >
                 </InitForm>
+                <AutoTable
+                    columns={[]}
+                    dataSource={[]}
+
+                >
+
+                </AutoTable>
             </div>
 
         </div>

@@ -411,7 +411,7 @@ let InitForm = ({ fields, onChange, submitting, submitData, actions, col, mode, 
                           value={item.value}
                           height={item.height}
                           rerender={item.rerender}
-                          serverURL={item.serverURL ? item.serverURL : '/ngy/ngic-auth/common/uploadFile'}
+                          serverURL={item.serverURL}
                         ></Editor>
                       </Form.Item>
                     </Col>
@@ -601,7 +601,7 @@ let InitForm = ({ fields, onChange, submitting, submitData, actions, col, mode, 
                 } else if (item.type == 'upload') {
                   const props = {
                     name: "file",
-                    action: item.serverURL ? item.serverURL : '/ngy/ngic-auth/common/uploadFile',
+                    action: item.serverURL ? item.serverURL : window?.dataconfig?.serverURL ,
                     listType: item.listType == "img" ? "picture-card" : 'text',
                     multiple: item.multiple ? item.multiple : false,
                     defaultFileList: item.value ? item.value.fileList ? item.value.fileList : [] : [],

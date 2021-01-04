@@ -4,6 +4,9 @@ import React, { useState, useMemo, useEffect } from 'react';
 import moment from 'moment';
 
 export default function Editor({ value, onChange, height, rerender,serverURL,style,bordered }) {
+
+  
+
   let [editorState, ceditor] = useState(
       BraftEditor.createEditorState(
         '<p style="text-align:start;" size="0" _root="undefined" __ownerID="undefined" __hash="undefined" __altered="false"></p>',
@@ -52,7 +55,7 @@ export default function Editor({ value, onChange, height, rerender,serverURL,sty
     xhr.addEventListener('error', errorFn, false);
     xhr.addEventListener('abort', errorFn, false);
     fd.append('file', param.file);
-    xhr.open('POST', serverURL, true);
+    xhr.open('POST', serverURL?serverURL:window?.dataconfig?.serverURL, true);
     xhr.send(fd);
   };
 
